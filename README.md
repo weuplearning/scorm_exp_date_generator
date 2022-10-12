@@ -54,4 +54,4 @@ Contributions are what make the open source community such an amazing place to b
 ## Contact
 Dimitri hoareau - [https://twitter.com/dimitriHoareau1](https://twitter.com/dimitriHoareau1) - dimitrihoareau2@gmail.com
 
-Project Link: [https://github.com/dimitri-hoareau/P02_scraper/](https://github.com/dimitri-hoareau/P02_scraper/)
+Project Link: [https://github.com/weuplearning/scorm_exp_date_generator](https://github.com/weuplearning/scorm_exp_date_generator)
