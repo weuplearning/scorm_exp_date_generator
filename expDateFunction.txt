@@ -1,0 +1,22 @@
+wul_action = function () {
+    wul_exp_date = new Date('SCORM_EXP_DATE 11:30:00 GMT+0200 (heure d’été d’Europe centrale)'); today = new Date();
+    if (today > wul_exp_date) {
+        document.open();
+        document.write('<div><strong>SCORM_EXP_MSG<br /></strong></div>');
+        document.close();
+    }
+};
+SCORM_Initialize = (function () {
+    var cached_function = SCORM_Initialize;
+    return function () {
+        wul_action()
+        cached_function.apply(this, arguments);
+    };
+}());
+SCORM2004_Initialize = (function () {
+    var cached_function = SCORM2004_Initialize;
+    return function () {
+        wul_action()
+        cached_function.apply(this, arguments);
+    };
+}());
