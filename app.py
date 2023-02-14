@@ -138,10 +138,16 @@ class MainWindow(QMainWindow):
         folder_name = scorm_name.replace('.zip', '')
         file_name = scorm_name.rsplit('/', 1)[-1]
         path = scorm_name.replace(file_name, '')
+        print("folder_name: " + folder_name)
+        print("file_name: " + file_name)
+        print("path: " + path)
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
         #extract firectory from zip file
         with zipfile.ZipFile(scorm_name, 'r') as zipObject:
-            zipObject.extractall(path)
+            zipObject.extractall(folder_name)
 
         #replace date with input values
         with open('expDateFunction.txt') as dataFile:
@@ -153,13 +159,15 @@ class MainWindow(QMainWindow):
             f.write(js_data)
 
         #replace the old zip files with the updated one
-        zf = zipfile.ZipFile(path + file_name_date + file_name, "w")
-        for dirname, subdirs, files in os.walk(folder_name):
-            updated_dirname = dirname.replace(path,'')
-            zf.write(updated_dirname)
-            for filename in files:
-                zf.write(os.path.join(updated_dirname, filename))
-        zf.close()
+        # zf = zipfile.ZipFile(path + file_name_date + file_name, "w")
+        # for dirname, subdirs, files in os.walk(folder_name):
+        #     updated_dirname = dirname.replace(path,'')
+        #     zf.write(updated_dirname)
+        #     for filename in files:
+        #         zf.write(os.path.join(updated_dirname, filename))
+        # zf.close()
+
+        shutil.make_archive(path + file_name_date + file_name, format='zip', root_dir=folder_name)
 
         shutil.rmtree(folder_name, ignore_errors=False, onerror=None)
 
