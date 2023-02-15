@@ -9,22 +9,21 @@
 # gestion des erreurs (mauvais format, input vide, autres erreurs, caractères spéciaux dans nom de fichier)
 # appli executable sur différents Os
 
-import os
 import sys
 import zipfile
-
-from PyQt5.QtWidgets import *
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 import shutil
+
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QSize, QDate
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLabel, QDateEdit, QLineEdit, QTextEdit, QMessageBox, QPushButton, \
+    QApplication
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        self.setMinimumSize(QSize(420, 300))
+        self.setMinimumSize(QSize(420, 400))
         self.setWindowTitle("Scorm Date Generator")
 
         options = QFileDialog.Options()
@@ -32,7 +31,7 @@ class MainWindow(QMainWindow):
 
         self.nameLabel = QLabel(self)
         self.nameLabel.setText('Date :')
-        self.nameLabel.move(20, 80)
+        self.nameLabel.move(10, 80)
 
         self.date = QDateEdit(self)
         # setting geometry of the date edit
@@ -50,7 +49,7 @@ class MainWindow(QMainWindow):
 
         self.scorm_message.move(100, 20)
         self.scorm_message.resize(200, 32)
-        self.scormLabel.move(20, 20)
+        self.scormLabel.move(10, 20)
 
         self.nameLabel = QLabel(self)
         self.nameLabel.setText('Message :')
@@ -58,18 +57,25 @@ class MainWindow(QMainWindow):
 
         self.line_message.move(100, 80)
         self.line_message.resize(200, 32)
-        self.nameLabel.move(20, 80)
+        self.nameLabel.move(10, 80)
 
         self.line_message.move(100, 140)
         self.line_message.resize(200, 32)
-        self.nameLabel.move(20, 140)
+        self.nameLabel.move(10, 140)
+
+        self.progressionLabel = QLabel(self)
+        self.progressionLabel.setText('Progression :')
+        self.progressionLabel.move(10, 260)
+
+        self.progression = QTextEdit(self)
+        self.progression.setReadOnly(True)
+        self.progression.move(100, 260)
+        self.progression.resize(200, 100)
 
         self.error_message = QMessageBox()
         self.error_message.setIcon(QMessageBox.Critical)
         self.error_message.setText("Veuillez remplir tous les champs")
         self.error_message.setWindowTitle("Informations manquantes")
-
-        self.error_dialog = QtWidgets.QErrorMessage()
 
         pybutton = QPushButton('OK', self)
         pybutton.clicked.connect(self.click_method)
@@ -87,6 +93,10 @@ class MainWindow(QMainWindow):
         error_message.setText(error)
         error_message.setWindowTitle("Erreur")
         error_message.exec_()
+
+    def update_progress(self, message):
+        self.progression.append(message)
+        QApplication.processEvents()
 
     def browse_scorm(self):
         path = QFileDialog.getOpenFileName(self, 'Open a file', '',
@@ -149,6 +159,7 @@ class MainWindow(QMainWindow):
 
         # extract firectory from zip file
         try:
+            self.update_progress("Extration du fichier zip")
             with zipfile.ZipFile(scorm_name, 'r') as zipObject:
                 zipObject.extractall(folder_name)
         except OSError as error:
@@ -157,6 +168,7 @@ class MainWindow(QMainWindow):
 
         # replace date with input values
         try:
+            self.update_progress("Ajout de la date d'expiration")
             with open('expDateFunction.txt') as dataFile:
                 data = dataFile.read()
                 js_data = data.replace('SCORM_EXP_MSG', new_message).replace('SCORM_EXP_DATE',
@@ -166,6 +178,7 @@ class MainWindow(QMainWindow):
             return
 
         try:
+            self.update_progress("Ajout du la date d'expiration au scormdriver")
             with open(folder_name + '/lms/scormdriver.js', 'a', encoding='utf-8') as f:
                 f.write("\n")
                 f.write(js_data)
@@ -174,9 +187,13 @@ class MainWindow(QMainWindow):
             return
 
         # replace the old zip files with the updated one
+        self.update_progress("Création du nouveau fichier zip en cours")
         shutil.make_archive(path + file_name_date + file_name, format='zip', root_dir=folder_name)
 
+        self.update_progress("Suppression du dossier")
         shutil.rmtree(folder_name, ignore_errors=False, onerror=None)
+
+        self.update_progress("scrom avec date d'expiration crée")
 
         # FOR DEV
         self.close()
